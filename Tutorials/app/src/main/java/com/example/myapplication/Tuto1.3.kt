@@ -1,5 +1,8 @@
 package com.example.myapplication
 
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
+
 open class SmartDevice(val name: String, val category: String) {
     var deviceStatus = "online"
 
@@ -24,12 +27,7 @@ open class SmartDevice(val name: String, val category: String) {
 class SmartTvDevice(deviceName: String, deviceCategory: String):
         SmartDevice(name = deviceName, category = deviceCategory){
 
-    private var speakerVolume = 2
-        set(value) {
-            if (value in 1..100){
-                field = value
-            }
-        }
+    private var speakerVolume by RangeRegulator(initialValue = 2, minValue = 0, maxValue = 100)
 
     fun increaseSpeakerVolume(){
         speakerVolume++
@@ -48,6 +46,26 @@ class SmartTvDevice(deviceName: String, deviceCategory: String):
     }
 
 }
+
+class RangeRegulator(
+    initialValue: Int,
+    private val minValue: Int,
+    private val maxValue: Int
+) : ReadWriteProperty<Any?, Int> {
+
+    var fieldData = initialValue
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Int {
+        return fieldData
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
+        if (value in minValue..maxValue) {
+            fieldData = value
+        }
+    }
+}
+
 
 fun main(){
     val device = SmartDevice("Smart Light", "Lighting", 1)
